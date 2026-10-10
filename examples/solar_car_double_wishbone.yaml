@@ -1,0 +1,38 @@
+type: double_wishbone
+scope: corner
+side: left
+name: Solar car example corner
+version: 1.0.0
+units: millimeters
+
+actuation:
+  type: direct
+  mount: upright
+spring:
+  type: coilover
+
+config:
+  steering:
+    type: rack
+  wheel:
+    offset: 0
+    tire:
+      aspect_ratio: 0.55
+      section_width: 135
+      rim_diameter: 16
+  cg_position: {x: 1250, y: 0, z: 450}
+  wheelbase: 2500
+
+hardpoints:
+  lower_wishbone_inboard_front: {x: 170, y: 280, z: 150}
+  lower_wishbone_inboard_rear: {x: -190, y: 300, z: 150}
+  lower_wishbone_outboard: {x: 0, y: 650, z: 145}
+  upper_wishbone_inboard_front: {x: 150, y: 300, z: 355}
+  upper_wishbone_inboard_rear: {x: -170, y: 310, z: 355}
+  upper_wishbone_outboard: {x: -10, y: 610, z: 330}
+  trackrod_inboard: {x: 70, y: 250, z: 190}
+  trackrod_outboard: {x: 80, y: 625, z: 195}
+  axle_inboard: {x: -5, y: 590, z: 245}
+  axle_outboard: {x: -5, y: 690, z: 248}
+  strut_bottom: {x: 0, y: 620, z: 250}
+  strut_top: {x: 0, y: 390, z: 560}

@@ -16,6 +16,8 @@ PUBLIC_CORE_MODULES = {
     "kinematics.core.elements",
     "kinematics.core.export",
     "kinematics.core.input",
+    "kinematics.core.loads",
+    "kinematics.core.load_cases",
     "kinematics.core.metrics.main",
     "kinematics.core.metrics.registry",
     "kinematics.core.enums",

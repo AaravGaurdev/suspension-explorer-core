@@ -24,8 +24,8 @@ steering sweeps, calculate suspension metrics, export results, and render
 plots or animations.
 
 The solver models ideal rigid parts and joints. It calculates geometry and
-motion; it is not a compliance, load, or structural analysis
-tool.
+motion, and can perform a basic quasi-static load-path calculation on a solved
+state. It is not a compliance or structural analysis tool.
 
 <p align="center">
   <img src="images/plot.png" alt="Design condition visualization" width="80%">
@@ -61,7 +61,7 @@ Jacobian rather than by finite differencing adjacent sweep steps.
 
 ### Model limitations
 
-- Multibody dynamics, inertia, damping, applied loads, and transient behavior.
+- Multibody dynamics, inertia, damping, and transient behavior.
 - Bushing, chassis, tire, or component compliance.
 - Stress, fatigue, strength, and packaging or interference checks.
 - Suspension architectures other than double wishbone, MacPherson strut,
@@ -197,6 +197,92 @@ just setup
 
 The development workflow uses [uv](https://docs.astral.sh/uv/) and
 [`just`](https://github.com/casey/just).
+
+## Solar Suspension Lab web app
+
+See [What this fork adds](ADDITIONS.md) for a concise list of additions to the
+base library and the current supported scope.
+
+This fork includes a browser interface for preliminary solar-car load-path
+studies. It provides:
+
+- standard and custom acceleration, cornering, braking, bump, and aero cases;
+- multi-geometry comparison at design condition;
+- axial member forces and chassis-pickup force vectors;
+- load-case envelopes, equilibrium diagnostics, and an interactive 3D view;
+- CSV and self-contained HTML report downloads; and
+- explicit warnings when a topology or load case cannot be balanced by the
+  currently supported direct-upright load paths.
+
+Run it locally after installing the web extra:
+
+```bash
+uv sync --extra web
+uv run streamlit run streamlit_app.py
+```
+
+The included `examples/solar_car_double_wishbone.yaml` opens automatically.
+Upload one or more corner YAML files in the sidebar to compare designs.
+
+### Publish with Streamlit Community Cloud
+
+1. Fork this repository on GitHub and push this branch to the fork.
+2. Sign in at `share.streamlit.io` with GitHub and select **Create app**.
+3. Select the fork, its default branch, and `webapp/app.py` as the entrypoint.
+4. In advanced settings, select Python 3.12, then deploy.
+5. Share the generated `*.streamlit.app` URL with the team.
+
+`requirements.txt` is included for deployment. No secrets are required.
+GitHub Pages is not used because it cannot execute the
+Python solver; it may still be added later as a documentation and landing site.
+
+### Interpretation boundary
+
+The web app is a review and comparison interface over a rigid, quasi-static
+solver. It does not turn the underlying model into FEA. Results with failed
+equilibrium are intentionally prominent and must not be used for component
+sizing. Direct-upright two-force paths are supported automatically. Rockers,
+springs mounted to another moving body, trailing arms, compliance, fatigue,
+and impact dynamics require additional models and independent validation.
+
+## Quasi-static load calculation
+
+The core API can resolve a force applied at the tire contact center into axial
+member forces and chassis pickup loads for a solved corner state. For a
+conventional direct-link upright, load paths can be discovered from the
+assembly:
+
+```python
+from kinematics.core.enums import PointID
+from kinematics.core.loads import AppliedLoad, solve_static_loads, upright_load_paths
+
+state = suspension.initial_state()  # or any state returned by a sweep
+paths = upright_load_paths(suspension, state)
+result = solve_static_loads(
+    state,
+    loads=(
+        AppliedLoad(
+            point=PointID.WHEEL_CONTACT_CENTER,
+            force=(-500.0, -1200.0, 2500.0),  # N, chassis X/Y/Z axes
+        ),
+    ),
+    load_paths=paths,
+)
+
+for member in result.members:
+    print(member.path.label, member.axial_force)  # +tension, -compression
+```
+
+Forces use newtons, coordinates use the model's millimeters, and applied free
+moments use newton-millimeters. `pickup_force` is the force the member exerts
+on its chassis pickup. Inspect `force_residual`, `moment_residual`, `rank`, and
+`condition_number` before using a result.
+
+This is rigid-body, quasi-static equilibrium—not FEA. An indeterminate layout
+returns the minimum-norm force split because member and bushing stiffnesses are
+not modeled. Automatic path discovery intentionally ignores rocker-operated,
+trailing-arm, and other multi-body load paths; those need explicit load paths
+or a future multi-body equilibrium solver.
 
 ## Quick start
 

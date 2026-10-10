@@ -17,6 +17,12 @@ package = true
 [project.optional-dependencies]
 viz = ["matplotlib>=3.8"]
 cli = ["pyarrow>=21.0.0", "pyyaml>=6.0.2", "typer>=0.19.2"]
+web = [
+    "pandas>=2.2",
+    "plotly>=6.0",
+    "pyyaml>=6.0.2",
+    "streamlit>=1.45",
+]
 
 [dependency-groups]
 dev = [
@@ -132,6 +138,7 @@ ignore = [
 # Developer scripts print to the terminal by design.
 "tools/**/*.py" = ["D103", "T201", "PLR2004", "PLC0415", "PLR0915"]
 "scripts/**/*.py" = ["D103", "T201", "PLR2004", "PLC0415", "PLR0915"]
+"streamlit_app.py" = ["E501"] # Embedded HTML and UI copy are clearer unwrapped.
 # Typer declares CLI options as function-call defaults; that is the idiom.
 "src/kinematics/cli/app.py" = ["B008", "PLC0415", "T201"]
 "src/kinematics/cli/bootstrap.py" = ["PLC0415", "T201"]
